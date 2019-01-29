@@ -15,6 +15,11 @@ class App extends React.Component {
     }
 
   }
+
+  onSelectAnswer = (answer) => {
+    console.log('Answer Selected' + answer);
+  }
+
   render() {
     const { currentQuestion } = this.state;
     return (
@@ -40,7 +45,7 @@ class App extends React.Component {
           </div>
           {/* Progress - end */}
 
-          <Question currentQuestion={currentQuestion} />
+          <Question currentQuestion={currentQuestion} onSelectAnswer={this.onSelectAnswer} />
 
 
           {/* Results - start */}
