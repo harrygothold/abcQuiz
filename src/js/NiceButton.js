@@ -7,17 +7,23 @@ class NiceButton extends Component {
         const letters = ['A', 'B', 'C'];
         return letters[index]
     }
-
+    handleClick = (e) => {
+        const { choice, onSelectAnswer } = this.props;
+        this.button.classList.add('is-selected', 'is-highlighted');
+        setTimeout((e) => {
+            onSelectAnswer(choice);
+        }, 500)
+    }
     render() {
         const { choice, index, onSelectAnswer } = this.props;
         return (
-            <button className="btn btn-huge"><span className="letter" onClick={(e) => { onSelectAnswer(choice) }}>
+            <button ref={(input) => this.button = input} className="btn btn-huge" onClick={(e) => { this.handleClick(e) }}><span className="letter">
                 {this.getLetter(index)}</span>{choice}</button>
         )
     }
 }
 NiceButton.propTypes = {
-    choices: PropTypes.array.isRequired,
+    choice: PropTypes.string.isRequired,
     index: PropTypes.number.isRequired,
     onSelectAnswer: PropTypes.func.isRequired,
 }
