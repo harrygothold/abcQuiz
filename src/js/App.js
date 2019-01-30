@@ -1,6 +1,7 @@
 import React from 'react';
 import data from './data/Data';
 import Question from './Question';
+import Results from './Result';
 
 class App extends React.Component {
 
@@ -12,7 +13,9 @@ class App extends React.Component {
       currentQuestion: data.allQuestions[0],
       progress: 0,
       allAnswers: [],
-      loadNewQuestion: false
+      loadNewQuestion: false,
+      showResults: false,
+      loadingResults: false
     }
 
   }
@@ -26,15 +29,48 @@ class App extends React.Component {
 
   goToNextQuestion = () => {
     console.log('Go to next question');
+    const { progress, allQuestions, loadNewQuestion } = this.state;
     this.setState({
       loadNewQuestion: true
     });
+    setTimeout(() => {
+
+      if (progress < allQuestions.length - 1) {
+        this.setState({
+          progress: progress + 1,
+          currentQuestion: allQuestions[progress + 1],
+          loadNewQuestion: false
+        })
+      } else {
+        this.setState({
+          loadNewQuestion: false,
+          showResults: true
+        })
+      }
+    }, 300)
+  }
+
+  onLoadResult = () => {
+    console.log('Loading results');
+    this.setState({
+      loadingResults: true
+    })
+    fetch('https://api.myjson.com/bins/zgpjb').then(response => response.json())
+      .then(parsedJSON => {
+        console.log(parsedJSON.correctAnswers);
+        const correctAnswers = parsedJSON.correctAnswers;
+        this.setState({ correctAnswers, loadingResults: false, resultsLoaded: true })
+      })
+      .catch(error => {
+        console.log(error);
+        this.setState({ loadingResults: false, resultsLoaded: true })
+      })
   }
 
   render() {
-    const { currentQuestion, loadNewQuestion } = this.state;
+    const { currentQuestion, loadNewQuestion, showResults, allAnswers, allQuestions, loadingResults } = this.state;
     return (
-      <div>
+      <div className={`${loadingResults ? 'is-loading-results' : ''}`}>
 
         {/* Header - start */}
         <header>
@@ -56,24 +92,7 @@ class App extends React.Component {
           </div>
           {/* Progress - end */}
 
-          <Question currentQuestion={currentQuestion} onSelectAnswer={this.onSelectAnswer} loadNewQuestion={loadNewQuestion} />
-
-
-          {/* Results - start */}
-          <div className="results">
-            <div className="loader"><div className="icon"></div></div>
-            <div className="results-overlay"></div>
-            <h1>Here are your answers:</h1>
-            <div className="answers">
-              <ol>
-                <li>What is the best city in the world? <br /><strong>Melbourne</strong></li>
-              </ol>
-            </div>
-            <div className="text-center">
-              <button className="btn btn-dark">Submit</button>
-            </div>
-          </div>
-          {/* Results - end */}
+          {!showResults ? <Question currentQuestion={currentQuestion} onSelectAnswer={this.onSelectAnswer} loadNewQuestion={loadNewQuestion} /> : <Results onLoadResult={this.onLoadResult} loadNewQuestion={loadNewQuestion} allAnswers={allAnswers} allQuestions={allQuestions} />}
 
         </div>
         {/* Content - end */}
