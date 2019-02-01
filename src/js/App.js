@@ -15,7 +15,8 @@ class App extends React.Component {
       allAnswers: [],
       loadNewQuestion: false,
       showResults: false,
-      loadingResults: false
+      loadingResults: false,
+      correctAnswers: null
     }
 
   }
@@ -68,9 +69,9 @@ class App extends React.Component {
   }
 
   render() {
-    const { currentQuestion, loadNewQuestion, showResults, allAnswers, allQuestions, loadingResults } = this.state;
+    const { currentQuestion, loadNewQuestion, showResults, allAnswers, allQuestions, loadingResults, correctAnswers, resultsLoaded } = this.state;
     return (
-      <div className={`${loadingResults ? 'is-loading-results' : ''}`}>
+      <div className={`${loadingResults ? 'is-loading-results' : ''} ${resultsLoaded ? 'is-showing-results' : 'no-results-loaded'}`}>
 
         {/* Header - start */}
         <header>
@@ -92,7 +93,7 @@ class App extends React.Component {
           </div>
           {/* Progress - end */}
 
-          {!showResults ? <Question currentQuestion={currentQuestion} onSelectAnswer={this.onSelectAnswer} loadNewQuestion={loadNewQuestion} /> : <Results onLoadResult={this.onLoadResult} loadNewQuestion={loadNewQuestion} allAnswers={allAnswers} allQuestions={allQuestions} />}
+          {!showResults ? <Question currentQuestion={currentQuestion} onSelectAnswer={this.onSelectAnswer} loadNewQuestion={loadNewQuestion} /> : <Results onLoadResult={this.onLoadResult} loadNewQuestion={loadNewQuestion} allAnswers={allAnswers} allQuestions={allQuestions} correctAnswers={correctAnswers} />}
 
         </div>
         {/* Content - end */}
