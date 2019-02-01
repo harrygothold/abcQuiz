@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import Answers from './Answers';
 
-const Results = ({ loadNewQuestion, allAnswers, allQuestions, onLoadResult, correctAnswers, resultsLoaded }) => {
+const Results = ({ loadNewQuestion, allAnswers, allQuestions, onLoadResult, correctAnswers, resultsLoaded, onRestart }) => {
 
     let numberOfCorrect = 0;
     correctAnswers && allQuestions.map((question, index) => {
@@ -24,7 +24,7 @@ const Results = ({ loadNewQuestion, allAnswers, allQuestions, onLoadResult, corr
                     }}>Start Again</button> :
                     <button className="btn btn-dark" onClick={(e) => {
                         onLoadResult()
-                    }}>Restart</button>
+                    }}>Submit</button>
                 }
             </div>
         </div>
