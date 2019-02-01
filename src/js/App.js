@@ -2,6 +2,9 @@ import React from 'react';
 import data from './data/Data';
 import Question from './Question';
 import Results from './Result';
+import Progress from './Progress';
+import Arrow from './Arrow';
+import defaultImage from '../images/truck.svg';
 
 class App extends React.Component {
 
@@ -16,16 +19,30 @@ class App extends React.Component {
       loadNewQuestion: false,
       showResults: false,
       loadingResults: false,
-      correctAnswers: null
+      correctAnswers: null,
+      resultsLoaded: false
     }
 
   }
 
   onSelectAnswer = (answer) => {
-    const { allAnswers } = this.state;
-    this.setState({
-      allAnswers: [...allAnswers, answer]
-    }, this.goToNextQuestion());
+    const { allAnswers, progress } = this.state;
+    const currentAnswer = allAnswers[progress];
+
+    if (currentAnswer) {
+      //replace it
+      allAnswers[progress] = answer;
+      this.setState({
+        allAnswers
+      }, this.goToNextQuestion());
+    } else {
+      //add answer to array
+      this.setState({
+        allAnswers: [...allAnswers, answer]
+      }, this.goToNextQuestion());
+    }
+
+
   }
 
   goToNextQuestion = () => {
@@ -51,6 +68,28 @@ class App extends React.Component {
     }, 300)
   }
 
+  goToPreviousQuestion = () => {
+    const { progress, allQuestions, showResults } = this.state;
+
+    this.setState({
+      loadNewQuestion: true
+    });
+
+    setTimeout(() => {
+      if (progress > 0 && !showResults) {
+        this.setState({
+          progress: progress - 1,
+          loadNewQuestion: false,
+          currentQuestion: allQuestions[progress - 1]
+        })
+      }
+      showResults && this.setState({
+        showResults: false,
+        loadNewQuestion: false,
+      })
+    }, 300);
+  }
+
   onLoadResult = () => {
     console.log('Loading results');
     this.setState({
@@ -68,44 +107,48 @@ class App extends React.Component {
       })
   }
 
+  onRestart = () => {
+    this.setState({
+      allAnswers: [],
+      correctAnswers: null,
+      currentQuestion: this.state.allQuestions[0],
+      progress: 0,
+      resultsLoaded: false,
+      showResults: false
+    })
+  }
+
   render() {
-    const { currentQuestion, loadNewQuestion, showResults, allAnswers, allQuestions, loadingResults, correctAnswers, resultsLoaded } = this.state;
+    const { currentQuestion, loadNewQuestion, showResults, allAnswers, allQuestions, loadingResults, correctAnswers, resultsLoaded, progress } = this.state;
+
+    const { image } = currentQuestion;
+    const headerImage = !showResults ? image : defaultImage;
+
+    const navIsActive = allAnswers.length > 0;
     return (
       <div className={`${loadingResults ? 'is-loading-results' : ''} ${resultsLoaded ? 'is-showing-results' : 'no-results-loaded'}`}>
 
         {/* Header - start */}
         <header>
-          <img src="https://ihatetomatoes.net/react-tutorials/abc-quiz/images/plane.svg" className={`${loadNewQuestion ? 'fade-out fade-out-active' : 'fade-out'}`} />
+          <img src={headerImage} className={`${loadNewQuestion ? 'fade-out fade-out-active' : 'fade-out'}`} />
         </header>
         {/* Header - end */}
 
         {/* Content - start */}
         <div className={`content`}>
 
-          {/* Progress - start */}
-          <div className="progress-container">
-            <div className="progress-label">1 of 5 answered</div>
-            <div className="progress">
-              <div className="progress-bar" style={{ 'width': `20%` }}>
-                <span className="sr-only">20% Complete</span>
-              </div>
-            </div>
-          </div>
-          {/* Progress - end */}
+          <Progress total={allQuestions.length} progress={allAnswers.length} />
 
-          {!showResults ? <Question currentQuestion={currentQuestion} onSelectAnswer={this.onSelectAnswer} loadNewQuestion={loadNewQuestion} /> : <Results onLoadResult={this.onLoadResult} loadNewQuestion={loadNewQuestion} allAnswers={allAnswers} allQuestions={allQuestions} correctAnswers={correctAnswers} />}
+          {!showResults ? <Question allAnswers={allAnswers} currentQuestion={currentQuestion} onSelectAnswer={this.onSelectAnswer} loadNewQuestion={loadNewQuestion} /> :
+            <Results onRestart={this.onRestart} onLoadResult={this.onLoadResult} loadNewQuestion={loadNewQuestion} allAnswers={allAnswers} allQuestions={allQuestions} correctAnswers={correctAnswers} resultsLoaded={resultsLoaded} />}
 
         </div>
         {/* Content - end */}
 
         {/* Navigation - start */}
-        <div className={`navigation text-center is-active`}>
-          <button className={`arrow`}>
-            <img src="https://ihatetomatoes.net/react-tutorials/abc-quiz/fonts/navigation-left-arrow.svg" />
-          </button>
-          <button disabled className={`arrow is-disabled`}>
-            <img src="https://ihatetomatoes.net/react-tutorials/abc-quiz/fonts/navigation-right-arrow.svg" />
-          </button>
+        <div className={`navigation text-center ${navIsActive ? 'is-active' : ''}`}>
+          <Arrow direction='left' progress={progress} allAnswers={allAnswers} goToPreviousQuestion={this.goToPreviousQuestion} showResults={showResults} />
+          <Arrow direction='right' progress={progress} allAnswers={allAnswers} goToNextQuestion={this.goToNextQuestion} showResults={showResults} />
         </div>
         {/* Navigation - end */}
 
